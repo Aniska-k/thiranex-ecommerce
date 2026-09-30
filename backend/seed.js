@@ -1,0 +1,47 @@
+import 'dotenv/config'; import mongoose from 'mongoose'; import bcrypt from 'bcryptjs'; import User from './models/User.js'; import Product from './models/Product.js';
+const img=(id)=>`https://images.unsplash.com/${id}?auto=format&fit=crop&w=900&q=85`;
+const products=[
+['AeroFlex Wireless Headphones','Audio','SoundMax',2499,3499,38,'Wireless headphones with ANC, 40-hour battery and deep bass.','photo-1505740420928-5e560c06d30e'],
+['PulseFit Smart Watch','Wearables','PulseFit',3299,4999,24,'AMOLED smartwatch with health tracking, notifications and 7-day battery.','photo-1523275335684-37898b6baf30'],
+['Nova X1 Smartphone 5G','Mobiles','Nova',18999,21999,15,'6.6-inch 120Hz display, 50MP camera and all-day battery.','photo-1511707171634-5f897ff02aa9'],
+['KeyPro Mechanical Keyboard','Computers','KeyPro',2799,3999,31,'Hot-swappable mechanical keyboard with RGB backlight and USB-C.','photo-1587829741301-dc798b83add3'],
+['SwiftClick Wireless Mouse','Computers','SwiftClick',899,1299,52,'Ergonomic silent mouse with adjustable DPI and rechargeable battery.','photo-1527814050087-3793815479db'],
+['Vision 27-inch 4K Monitor','Computers','Vision',21999,27999,12,'4K IPS monitor with HDR, USB-C and ultra-thin bezels.','photo-1527443224154-c4a3942d3acf'],
+['Urban Everyday Backpack','Bags','UrbanTrail',1499,2299,60,'Water-resistant 25L backpack with laptop sleeve and organizer pockets.','photo-1553062407-98eeb64c6a62'],
+['Classic Leather Wallet','Fashion','Crafthouse',799,1199,80,'Slim genuine-leather wallet with six card slots and RFID protection.','photo-1627123424574-724758594e93'],
+['Everyday Running Shoes','Footwear','Stride',2499,3299,44,'Lightweight breathable running shoes for daily training and walking.','photo-1542291026-7eec264c27ff'],
+['Urban Hoodie','Fashion','Northline',1799,2499,35,'Soft cotton-blend oversized hoodie with brushed fleece interior.','photo-1551488831-00ddcb6c6bd3'],
+['Minimal Ceramic Mug Set','Home','Casa',699,999,75,'Set of four minimalist ceramic mugs, microwave and dishwasher safe.','photo-1514228742587-6b1558fcca3d'],
+['Aroma Desk Lamp','Home','Glow',1299,1899,29,'Warm LED desk lamp with touch controls and three brightness levels.','photo-1507473885765-e6ed057f782c'],
+['BrewMaster Coffee Maker','Kitchen','BrewMaster',3999,5499,18,'Compact drip coffee maker with reusable filter and keep-warm plate.','photo-1495474472287-4d71bcdd2085'],
+['ChefPro Non-Stick Pan','Kitchen','ChefPro',1199,1699,41,'Induction-ready non-stick pan with cool-touch handle.','photo-1556911220-bff31c812dba'],
+['PowerBlend Mixer','Kitchen','PowerBlend',2199,2999,26,'500W mixer with stainless blades and three speed modes.','photo-1570222094114-d054a817e56b'],
+['PureAir Mini Purifier','Home','PureAir',4499,5999,17,'HEPA air purifier for bedrooms and study rooms with quiet sleep mode.','photo-1585771724684-38269d6639fd'],
+['FitCore Yoga Mat','Fitness','FitCore',999,1499,68,'6mm non-slip yoga mat with alignment lines and carry strap.','photo-1592432678016-e910b452f9a2'],
+['HydraSteel Bottle 1L','Fitness','HydraSteel',799,1099,90,'Double-wall insulated stainless bottle keeping drinks cold for 24 hours.','photo-1602143407151-7111542de6e8'],
+['Adjustable Dumbbell Pair','Fitness','FitCore',3499,4499,22,'Space-saving adjustable dumbbells for home strength workouts.','photo-1583454110551-21f2fa2afe61'],
+['Travel Neck Pillow','Travel','CloudRest',699,999,55,'Memory foam travel pillow with washable cover and snap closure.','photo-1517841905240-472988babdf9'],
+['CarryLite Cabin Trolley','Travel','CarryLite',3999,5499,20,'Lightweight cabin suitcase with spinner wheels and TSA lock.','photo-1565026057447-bc90a3dceb87'],
+['NoiseBlock Earbuds','Audio','SoundMax',1599,2499,46,'True wireless earbuds with low-latency mode and charging case.','photo-1606220945770-b5b6c2c55bf1'],
+['BoomBox Portable Speaker','Audio','BoomBox',1999,2999,33,'IPX6 portable speaker with 12-hour playtime and punchy bass.','photo-1608043152269-423dbba4e7e1'],
+['Creator USB Microphone','Computers','StudioPro',2999,4299,14,'Plug-and-play condenser microphone for streaming and calls.','photo-1590602847861-f357a9332bbc'],
+['FastCharge 65W Adapter','Mobiles','Voltix',1499,1999,72,'GaN fast charger with USB-C PD and multiple protection layers.','photo-1609592424217-8f8b5d8e6c8d'],
+['Braided USB-C Cable 2m','Mobiles','Voltix',499,799,120,'Durable 100W USB-C cable with reinforced connectors.','photo-1551721434-8b94ddf7d9d8'],
+['Smart LED Light Strip','Home','Glow',899,1399,47,'App-controlled RGB light strip with music sync and scenes.','photo-1550751827-4bd374c3f58b'],
+['Ergo Office Chair','Furniture','ErgoSeat',8999,11999,9,'Breathable ergonomic chair with lumbar support and adjustable arms.','photo-1580480055273-228ff5388ef8'],
+['Laptop Stand Pro','Computers','DeskMate',1299,1899,37,'Aluminium adjustable stand that raises laptops to eye level.','photo-1524758631624-e2822e304c36'],
+['Study Desk Organizer','Stationery','DeskMate',599,899,83,'Multi-compartment organizer for pens, notes and accessories.','photo-1456324504439-367cee3b3c32'],
+['Premium Notebook A5','Stationery','PaperCraft',449,699,100,'Hardcover dotted notebook with 192 premium pages.','photo-1544816155-12df9643f363c'],
+['Gel Pen Pack','Stationery','PaperCraft',299,399,150,'Pack of 10 smooth-flow gel pens for notes and journaling.','photo-1585336261022-680e295ce3fe'],
+['Portable Power Bank 20000mAh','Mobiles','Voltix',1799,2499,34,'High-capacity power bank with 22.5W fast charging and dual USB.','photo-1609592424286-1b1c7f1c6d0e'],
+['Instant Print Camera','Cameras','Snapo',6999,8999,13,'Fun instant camera with selfie mirror and built-in flash.','photo-1516035069371-29a1b244cc32'],
+['Tripod with Phone Mount','Cameras','Snapo',1099,1599,28,'Adjustable tripod for mobile photography, reels and video calls.','photo-1492691527719-9d1e07e534b4'],
+['Scented Soy Candle Set','Home','Casa',799,1199,64,'Set of three hand-poured soy candles with calming fragrances.','photo-1603006905003-be475563bc59'],
+['Cotton Bedsheet Queen','Home','Casa',1599,2299,27,'Soft 100% cotton queen bedsheet with two matching pillow covers.','photo-1616486338812-3dadae4b4ace'],
+['Everyday Sunglasses','Fashion','Northline',899,1399,50,'UV400 polarized sunglasses with lightweight frames.','photo-1511499767150-a48a237f0083'],
+['Crossbody Sling Bag','Bags','UrbanTrail',1099,1699,43,'Compact everyday sling with hidden pocket and adjustable strap.','photo-1553062407-98eeb64c6a62'],
+['Smart Study Tablet 10','Tablets','Nova',12999,15999,16,'10-inch tablet for study, streaming and note-taking.','photo-1544244015-0df4b3ffc6b0']
+];
+const slugify=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+async function main(){await mongoose.connect(process.env.MONGODB_URI);await Product.deleteMany({});await User.deleteMany({});const docs=products.map((p,i)=>({name:p[0],category:p[1],brand:p[2],price:p[3],compareAtPrice:p[4],stock:p[5],description:p[6],images:[img(p[7])],rating:+(4.1+(i%9)/10).toFixed(1),reviewCount:20+i*7,tags:[p[1],p[2],i%2?'popular':'new'],featured:i<12,slug:slugify(p[0])}));await Product.insertMany(docs);const adminPass=await bcrypt.hash('Admin@123',10),userPass=await bcrypt.hash('User@123',10);await User.create([{name:'Thiranex Admin',email:'admin@thiranexstore.com',password:adminPass,role:'admin'},{name:'Demo Customer',email:'user@thiranexstore.com',password:userPass,role:'user'}]);console.log(`Seeded ${docs.length} products and demo accounts.`);await mongoose.disconnect()}
+main().catch(e=>{console.error(e);process.exit(1)});
